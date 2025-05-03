@@ -1,0 +1,6 @@
+tool
+
+axe
+weapon
+model
+cs2
