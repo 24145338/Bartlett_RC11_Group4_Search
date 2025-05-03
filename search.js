@@ -46,22 +46,22 @@ async function loadTextContents() {
 
 function searchFiles(query) {
     if (!fileData || !query) return [];
-    
+
     query = query.toLowerCase();
     const searchTerms = query.split(/\s+/); // Split on whitespace
     const results = [];
-    
+
     for (const [path, file] of Object.entries(fileData.files)) {
         // Check if all search terms match
         const hasAllTerms = searchTerms.every(term => {
             return file.tags.some(tagObj => {
                 const tagText = tagObj.tag.toLowerCase();
                 // Check if the tag contains the term or if multiple tags together match the term
-                return tagText.includes(term) || 
-                       file.tags.map(t => t.tag.toLowerCase()).join(' ').includes(term);
+                return tagText.includes(term) ||
+                    file.tags.map(t => t.tag.toLowerCase()).join(' ').includes(term);
             });
         });
-        
+
         if (hasAllTerms) {
             results.push({
                 path,
@@ -69,18 +69,18 @@ function searchFiles(query) {
             });
         }
     }
-    
+
     return results;
 }
 
 function displayResults(results) {
     const resultsContainer = document.getElementById('results');
-    
+
     if (results.length === 0) {
         resultsContainer.style.display = 'none';
         return;
     }
-    
+
     resultsContainer.style.display = 'grid';
     resultsContainer.innerHTML = results.map(result => `
         <div class="result-item">
@@ -97,9 +97,9 @@ function displayResults(results) {
                     </div>
                 ` : ''}
                 <div class="tags">
-                    ${result.tags.map(tag => 
-                        `<span class="tag">${tag.tag} (${tag.confidence})</span>`
-                    ).join('')}
+                    ${result.tags.map(tag =>
+        `<span class="tag">${tag.tag} (${tag.confidence})</span>`
+    ).join('')}
                 </div>
                 ${result.type === '3d' ? `
                     <button class="view-3d-btn" data-path="${result.path}">View 3D Model</button>
@@ -107,10 +107,10 @@ function displayResults(results) {
             </div>
         </div>
     `).join('');
-    
+
     // Add event listeners for 3D model buttons
     document.querySelectorAll('.view-3d-btn').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const modelPath = this.getAttribute('data-path');
             openModelViewer(modelPath);
         });
@@ -164,14 +164,14 @@ function openModelViewer(modelPath) {
             </div>
         `;
         document.body.appendChild(modal);
-        
+
         // Add close button event
         modal.querySelector('.close-modal').addEventListener('click', closeModelViewer);
     }
-    
+
     // Show modal
     modal.style.display = 'block';
-    
+
     // Initialize Three.js viewer
     initThreeJsViewer('data/' + modelPath);
 }
@@ -181,7 +181,7 @@ function closeModelViewer() {
     if (modal) {
         modal.style.display = 'none';
     }
-    
+
     // Clean up Three.js resources
     if (currentModel) {
         currentModel.dispose();
@@ -194,38 +194,38 @@ function initThreeJsViewer(modelUrl) {
     // Get container
     const container = document.getElementById('model-container');
     container.innerHTML = '';
-    
+
     // Set up scene
     const scene = new THREE.Scene();
     // Remove the background color
     // scene.background = new THREE.Color(0xf0f0f0);
-    
+
     // Camera
     const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
     camera.position.z = 5;
-    
+
     // Renderer with alpha
-    const renderer = new THREE.WebGLRenderer({ 
+    const renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true  // Enable transparency
     });
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setClearColor(0x000000, 0); // Set clear color with 0 alpha (transparent)
     container.appendChild(renderer.domElement);
-        
+
     // Lights
     const ambientLight = new THREE.AmbientLight(0xcccccc, 0.4);
     scene.add(ambientLight);
-    
+
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
     directionalLight.position.set(1, 1, 1);
     scene.add(directionalLight);
-    
+
     // Controls
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
-    
+
     // Loading indicator
     const loadingText = document.createElement('div');
     loadingText.style.position = 'absolute';
@@ -235,7 +235,7 @@ function initThreeJsViewer(modelUrl) {
     loadingText.style.color = '#333';
     loadingText.innerHTML = 'Loading 3D model...';
     container.appendChild(loadingText);
-    
+
     // Simplified loader usage based on the HTML imports
     const loader = new THREE.GLTFLoader();
     loader.load(
@@ -245,9 +245,9 @@ function initThreeJsViewer(modelUrl) {
             container.removeChild(loadingText);
             scene.add(gltf.scene);
             currentModel = gltf.scene;
-            
+
             // Make materials emissive
-            gltf.scene.traverse(function(node) {
+            gltf.scene.traverse(function (node) {
                 if (node.isMesh && node.material) {
                     // Handle both single material and array of materials
                     if (Array.isArray(node.material)) {
@@ -264,26 +264,26 @@ function initThreeJsViewer(modelUrl) {
                     }
                 }
             });
-            
+
             // Center and scale model
             const box = new THREE.Box3().setFromObject(gltf.scene);
             const center = box.getCenter(new THREE.Vector3());
             const size = box.getSize(new THREE.Vector3());
-            
+
             gltf.scene.position.x = -center.x;
             gltf.scene.position.y = -center.y;
             gltf.scene.position.z = -center.z;
-            
+
             const maxDim = Math.max(size.x, size.y, size.z);
             const fov = camera.fov * (Math.PI / 180);
             let cameraZ = Math.abs(maxDim / Math.sin(fov / 2));
             camera.position.z = cameraZ * 1.5;
-            
+
             const minZ = box.min.z;
             const cameraToFarEdge = (minZ < 0) ? -minZ + cameraZ : cameraZ - minZ;
             camera.far = cameraToFarEdge * 3;
             camera.updateProjectionMatrix();
-            
+
             controls.maxDistance = cameraToFarEdge * 2;
             controls.target = center;
             controls.update();
@@ -299,7 +299,7 @@ function initThreeJsViewer(modelUrl) {
             loadingText.innerHTML = 'Error loading model';
         }
     );
-    
+
     // Animation loop
     function animate() {
         requestAnimationFrame(animate);
@@ -307,9 +307,9 @@ function initThreeJsViewer(modelUrl) {
         renderer.render(scene, camera);
     }
     animate();
-    
+
     // Handle window resize
-    window.addEventListener('resize', function() {
+    window.addEventListener('resize', function () {
         camera.aspect = container.clientWidth / container.clientHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(container.clientWidth, container.clientHeight);
