@@ -28,7 +28,7 @@ jobs:
     # Step 4: Run your tagging script to generate tags.json
     - name: Run tag script
       run: |
-        python tags.py
+        python tag.py
 
     # Step 5: Deploy the current directory to GitHub Pages
     - name: Deploy to GitHub Pages
