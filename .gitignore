@@ -1,0 +1,25 @@
+# Python virtual environment
+searchengine/
+
+# ImageNet classes file
+imagenet_classes.txt
+
+# Python cache files (good practice to include)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore local virtual environment folder
+venv/
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Ignore system-generated files (macOS / Windows)
+.DS_Store
+Thumbs.db
+
+# Ignore temporary log files
+*.log

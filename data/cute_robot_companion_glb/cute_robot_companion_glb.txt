@@ -1,0 +1,4 @@
+cute
+robot
+companion
+glb
