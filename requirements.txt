@@ -1,4 +1,10 @@
-torch 
+# Core dependencies for tagging and visualization
+torch
+transformers
+spacy
+streamlit
 Pillow
-torchvision
-numpy
+
+# Note: You also need the spaCy English model.
+# Download it after installing these packages using:
+# python -m spacy download en_core_web_sm
